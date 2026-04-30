@@ -1,3 +1,6 @@
+// Punto de entrada del microservicio de envios.
+// Levanta la aplicacion NestJS en el puerto definido por la variable de entorno PORT (default 3000).
+// El prefijo global 'api' hace que todos los endpoints queden bajo /api/...
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 

@@ -1,3 +1,7 @@
+// Modulo raiz de la aplicacion.
+// Carga las variables de entorno con ConfigModule y conecta a PostgreSQL usando TypeORM.
+// DATABASE_URL y DATABASE_SSL son inyectadas por ECS desde SSM Parameter Store.
+// synchronize solo esta activo fuera del entorno 'main' para no alterar la BD en produccion.
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
