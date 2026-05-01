@@ -1,3 +1,5 @@
+// Controlador que expone los endpoints REST del CRUD de envios.
+// Todos los endpoints quedan bajo /api/envios gracias al prefijo global definido en main.ts.
 import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
 import { EnviosService } from './envios.service';
 import { CreateEnvioDto } from './dto/create-envio.dto';

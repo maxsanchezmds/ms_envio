@@ -1,3 +1,5 @@
+// Servicio que contiene la logica de negocio del CRUD de envios.
+// Usa el repositorio de TypeORM para interactuar con la base de datos PostgreSQL.
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
