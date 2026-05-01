@@ -1,0 +1,64 @@
+name: "Envios Production Deploy"
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  SERVICE_NAME: envios
+
+jobs:
+  deploy-prod:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: envios-prod-deploy
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.ACCESS_KEY_SECRET }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Resolve ECR repository
+        id: ecr
+        run: |
+          REPO_URL="$(aws ssm get-parameter --name "/smartlogix/ecr/${SERVICE_NAME}" --query 'Parameter.Value' --output text)"
+          echo "repo_url=${REPO_URL}" >> "$GITHUB_OUTPUT"
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push production image
+        id: image
+        run: |
+          SHORT_SHA="${GITHUB_SHA::12}"
+          IMAGE_URI="${{ steps.ecr.outputs.repo_url }}:sha-${SHORT_SHA}"
+          LATEST_URI="${{ steps.ecr.outputs.repo_url }}:main-latest"
+          docker build -t "$IMAGE_URI" -t "$LATEST_URI" .
+          docker push "$IMAGE_URI"
+          docker push "$LATEST_URI"
+          echo "image_uri=${IMAGE_URI}" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service \
+            --cluster ecs-cluster-smartlogix-main \
+            --service srv-${{ env.SERVICE_NAME }}-main \
+            --force-new-deployment
+
+      - name: Wait for deployment to stabilize
+        run: |
+          aws ecs wait services-stable \
+            --cluster ecs-cluster-smartlogix-main \
+            --services srv-${{ env.SERVICE_NAME }}-main
