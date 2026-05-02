@@ -11,6 +11,7 @@ permissions:
 env:
   AWS_REGION: us-east-1
   ENVIOS_DEPLOY_CONTRACT_PREFIX: /smartlogix/envios/deploy
+  KONG_DEPLOY_CONTRACT_PREFIX: /smartlogix/kong/deploy
 
 jobs:
   deploy-prod:
