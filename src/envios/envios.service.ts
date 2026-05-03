@@ -33,6 +33,12 @@ export class EnviosService {
     return this.envioRepository.findBy({ pedidoId });
   }
 
+  async createDesdePedidoAprobado(pedidoId: string, direccionDestino: string, ciudadDestino: string): Promise<Envio> {
+    const envio = await this.create({ pedidoId, direccionDestino, ciudadDestino });
+    await this.publisher.publishEnvioPendiente(envio);
+    return envio;
+  }
+
   async update(id: string, updateEnvioDto: UpdateEnvioDto): Promise<Envio> {
     const envio = await this.findOne(id);
     const estadoAnterior = envio.estado;

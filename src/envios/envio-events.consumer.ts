@@ -56,7 +56,9 @@ export class EnvioEventsConsumer implements OnModuleInit, OnModuleDestroy {
       const body = this.parseBody(message.Body ?? '');
       const evento = body.evento as string | undefined;
 
-      if (evento === 'pedido_cancelado') {
+      if (evento === 'pedido_aprobado') {
+        await this.handlePedidoAprobado(body);
+      } else if (evento === 'pedido_cancelado') {
         await this.handlePedidoCancelado(body);
       } else if (evento === 'pedido_actualizado') {
         await this.handlePedidoActualizado(body);
@@ -79,6 +81,12 @@ export class EnvioEventsConsumer implements OnModuleInit, OnModuleDestroy {
       return JSON.parse(parsed.Message) as Record<string, unknown>;
     }
     return parsed;
+  }
+
+  private async handlePedidoAprobado(body: Record<string, unknown>): Promise<void> {
+    const pedido = body.pedido as { id?: string; direccionDestino?: string; ciudadDestino?: string } | undefined;
+    if (!pedido?.id || !pedido.direccionDestino || !pedido.ciudadDestino) return;
+    await this.enviosService.createDesdePedidoAprobado(pedido.id, pedido.direccionDestino, pedido.ciudadDestino);
   }
 
   private async handlePedidoCancelado(body: Record<string, unknown>): Promise<void> {

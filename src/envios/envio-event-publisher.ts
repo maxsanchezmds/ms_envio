@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PublishCommand, SNSClient } from '@aws-sdk/client-sns';
 import { Envio } from './envio.entity';
 
-type EnvioEvento = 'envio_aprobado' | 'envio_rechazado' | 'envio_atrasado' | 'envio_finalizado';
+type EnvioEvento = 'envio_pendiente' | 'envio_aprobado' | 'envio_rechazado' | 'envio_finalizado';
 
 @Injectable()
 export class EnvioEventPublisher {
@@ -22,8 +22,8 @@ export class EnvioEventPublisher {
     await this.publish('envio_finalizado', envio);
   }
 
-  async publishEnvioAtrasado(envio: Envio): Promise<void> {
-    await this.publish('envio_atrasado', envio);
+  async publishEnvioPendiente(envio: Envio): Promise<void> {
+    await this.publish('envio_pendiente', envio);
   }
 
   private async publish(evento: EnvioEvento, envio: Envio): Promise<void> {
